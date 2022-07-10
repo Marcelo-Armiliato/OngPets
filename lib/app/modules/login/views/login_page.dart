@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../../widgets/customElevatedButton.dart';
 import '../../../widgets/customTextFormField.dart';
+import '../../../widgets/msgPopup.dart';
+import '../../globalUsers.dart';
 import 'login_store.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,7 +16,6 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends ModularState<LoginPage, LoginStore> {
   final _formKey = GlobalKey<FormState>();
-  // final LoginStore store = Modular.get();
 
   final _emailController = TextEditingController();
   bool allowShowError = false;
@@ -25,6 +26,20 @@ class LoginPageState extends ModularState<LoginPage, LoginStore> {
     final double screenWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            MsgPopup().msgFeedback(
+                context,
+                'Usuários disponíveis\n',
+                Users.listEmailsAcess!
+                    .toList()
+                    .toString()
+                    .replaceAll('[', '')
+                    .replaceAll(']', ''));
+          },
+          child: Icon(Icons.people_sharp, size: screenHeight * 0.035),
+          elevation: 5,
+        ),
         backgroundColor: Color.fromARGB(255, 246, 243, 243),
         body: SingleChildScrollView(
           child: Container(
@@ -71,11 +86,15 @@ class LoginPageState extends ModularState<LoginPage, LoginStore> {
                             height: screenHeight * 0.06,
                           ),
                           CustomElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               if (_formKey.currentState!.validate()) {
                                 allowShowError = true;
                                 FocusScope.of(context).unfocus();
                                 store.authUser(email: _emailController.text);
+                                if (store.userAuth == false) {
+                                  MsgPopup().msgFeedback(
+                                      context, 'Usuário não encontrado!', '');
+                                }
                               }
                             },
                             textButton: 'Entrar',
